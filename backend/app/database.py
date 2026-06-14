@@ -1,4 +1,4 @@
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine  # requires psycopg[binary]
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 from app.config import settings
