@@ -7,13 +7,23 @@ from fastapi.responses import JSONResponse
 logger = logging.getLogger("ttm.errors")
 
 
+def _serializable(obj):
+    if isinstance(obj, dict):
+        return {k: _serializable(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_serializable(v) for v in obj]
+    if isinstance(obj, Exception):
+        return str(obj)
+    return obj
+
+
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     logger.warning("Validation error on %s: %s", request.url.path, exc.errors())
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         content={
             "detail": "Invalid request data",
-            "errors": exc.errors(),
+            "errors": _serializable(exc.errors()),
         },
     )
 

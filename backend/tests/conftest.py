@@ -1,9 +1,21 @@
+import asyncio
+import os
+import sys
+import uuid
+
+# Must be set before importing the app so slowapi reads it during Limiter.__init__
+os.environ["RATELIMIT_ENABLED"] = "false"
+
 import pytest
 from httpx import ASGITransport, AsyncClient
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.database import Base, get_db
-from app.main import app
+from app.main import app, limiter
+
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 TEST_DATABASE_URL = "postgresql+psycopg://postgres:postgres@localhost:5432/talktome_test"
 
@@ -29,6 +41,15 @@ async def setup_database():
         await conn.run_sync(Base.metadata.drop_all)
 
 
+@pytest.fixture(autouse=True)
+async def clean_tables():
+    """Truncate all data tables between tests."""
+    yield
+    async with test_engine.begin() as conn:
+        for table in reversed(Base.metadata.sorted_tables):
+            await conn.execute(text(f'TRUNCATE TABLE "{table.name}" CASCADE'))
+
+
 @pytest.fixture
 async def db() -> AsyncSession:
     async with TestSessionLocal() as session:
@@ -46,9 +67,10 @@ async def client() -> AsyncClient:
 @pytest.fixture
 async def registered_user(client: AsyncClient) -> dict:
     """Register a user and return their credentials."""
+    uid = uuid.uuid4().hex[:8]
     payload = {
-        "email": "test@example.com",
-        "username": "testuser",
+        "email": f"test_{uid}@example.com",
+        "username": f"testuser_{uid}",
         "password": "testpassword123",
     }
     res = await client.post("/api/auth/register", json=payload)
