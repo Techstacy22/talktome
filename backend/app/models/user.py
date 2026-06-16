@@ -25,3 +25,4 @@ class User(Base):
 
     journals: Mapped[list["Journal"]] = relationship(back_populates="user")
     chat_sessions: Mapped[list["ChatSession"]] = relationship(back_populates="user")
+    profile: Mapped["Profile | None"] = relationship(back_populates="user", uselist=False)
