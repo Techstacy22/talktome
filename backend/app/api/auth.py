@@ -1,5 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
@@ -11,6 +13,7 @@ from app.services import auth as auth_service
 from app.utils.security import create_access_token
 
 router = APIRouter()
+limiter = Limiter(key_func=get_remote_address)
 
 
 @router.post(
@@ -19,7 +22,8 @@ router = APIRouter()
     status_code=status.HTTP_201_CREATED,
     summary="Register a new user",
 )
-async def register(data: UserCreate, db: AsyncSession = Depends(get_db)):
+@limiter.limit("10/minute")
+async def register(request: Request, data: UserCreate, db: AsyncSession = Depends(get_db)):
     existing = await auth_service.get_user_by_email(db, data.email)
     if existing:
         raise HTTPException(
@@ -34,11 +38,12 @@ async def register(data: UserCreate, db: AsyncSession = Depends(get_db)):
     response_model=Token,
     summary="Login and receive a JWT access token",
 )
+@limiter.limit("5/minute")
 async def login(
+    request: Request,
     form: OAuth2PasswordRequestForm = Depends(),
     db: AsyncSession = Depends(get_db),
 ):
-    # OAuth2PasswordRequestForm uses 'username' field — we treat it as email
     user = await auth_service.authenticate_user(db, form.username, form.password)
     if user is None:
         raise HTTPException(
