@@ -5,6 +5,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Onboarding from "./pages/Onboarding";
 import Dashboard from "./pages/Dashboard";
+import DashboardHome from "./pages/DashboardHome";
 import JournalList from "./pages/JournalList";
 import JournalNew from "./pages/JournalNew";
 import JournalEdit from "./pages/JournalEdit";
@@ -34,7 +35,8 @@ export default function App() {
               </ProtectedRoute>
             }
           >
-            <Route index element={<JournalList />} />
+            <Route index element={<DashboardHome />} />
+            <Route path="journals" element={<JournalList />} />
             <Route path="journals/new" element={<JournalNew />} />
             <Route path="journals/:id/edit" element={<JournalEdit />} />
             <Route path="chat/new" element={<ChatNew />} />

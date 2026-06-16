@@ -50,6 +50,12 @@ export default function Dashboard() {
             to="/dashboard"
             className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600"
           >
+            🏠 Home
+          </Link>
+          <Link
+            to="/dashboard/journals"
+            className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600"
+          >
             📓 Journals
           </Link>
           <Link
