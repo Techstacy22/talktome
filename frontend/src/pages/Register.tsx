@@ -19,10 +19,10 @@ export default function Register() {
       const loginForm = new URLSearchParams();
       loginForm.append("username", form.email);
       loginForm.append("password", form.password);
-      const res = await api.post<{ access_token: string }>("/auth/login", loginForm, {
+      const res = await api.post<{ access_token: string; refresh_token: string }>("/auth/login", loginForm, {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
       });
-      await login(res.data.access_token);
+      await login(res.data.access_token, res.data.refresh_token);
       navigate("/onboarding");
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;

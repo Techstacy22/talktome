@@ -1,15 +1,14 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Background,
   BackgroundVariant,
   Controls,
-  Edge,
   MiniMap,
-  Node,
   ReactFlow,
   useEdgesState,
   useNodesState,
 } from "@xyflow/react";
+import type { Edge, Node } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import api from "../lib/api";
 
