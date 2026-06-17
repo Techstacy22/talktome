@@ -88,16 +88,16 @@ export default function DashboardHome() {
       </div>
 
       {/* AI Insight */}
-      <div className="rounded-xl border border-indigo-100 bg-gradient-to-r from-indigo-50 to-purple-50 px-5 py-4">
-        <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-indigo-400">
+      <div className="rounded-xl border border-indigo-100 dark:border-indigo-900 bg-linear-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/50 dark:to-purple-950/50 px-5 py-4">
+        <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-indigo-400 dark:text-indigo-300">
           ✨ AI Insight
         </p>
         {insightLoading ? (
           <div className="h-4 w-3/4 animate-pulse rounded bg-indigo-200" />
         ) : insight ? (
-          <p className="text-sm text-indigo-800">{insight}</p>
+          <p className="text-sm text-indigo-800 dark:text-indigo-200">{insight}</p>
         ) : (
-          <p className="text-sm italic text-indigo-300">
+          <p className="text-sm italic text-indigo-300 dark:text-indigo-600">
             Write a journal or start a chat to get your first insight.
           </p>
         )}
@@ -108,7 +108,7 @@ export default function DashboardHome() {
         {/* Recent Journals */}
         <section>
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-gray-700">Recent Journals</h2>
+            <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Recent Journals</h2>
             <Link
               to="/dashboard/journals"
               className="text-xs text-indigo-500 hover:underline"
@@ -123,10 +123,10 @@ export default function DashboardHome() {
                 <li key={j.id}>
                   <Link
                     to={`/dashboard/journals/${j.id}/edit`}
-                    className="flex items-center justify-between rounded-lg border border-gray-100 bg-white px-4 py-3 text-sm hover:border-indigo-200 hover:bg-indigo-50"
+                    className="flex items-center justify-between rounded-lg border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 text-sm hover:border-indigo-200 dark:hover:border-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
                   >
-                    <span className="truncate font-medium text-gray-800">{j.title}</span>
-                    <span className="ml-3 shrink-0 text-xs text-gray-400">
+                    <span className="truncate font-medium text-gray-800 dark:text-gray-100">{j.title}</span>
+                    <span className="ml-3 shrink-0 text-xs text-gray-400 dark:text-gray-500">
                       {timeAgo(j.created_at)}
                     </span>
                   </Link>
@@ -142,7 +142,7 @@ export default function DashboardHome() {
 
           <Link
             to="/dashboard/journals/new"
-            className="mt-3 flex w-full items-center justify-center rounded-lg border border-dashed border-indigo-200 py-2 text-sm text-indigo-400 hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-600"
+            className="mt-3 flex w-full items-center justify-center rounded-lg border border-dashed border-indigo-200 dark:border-indigo-800 py-2 text-sm text-indigo-400 dark:text-indigo-500 hover:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:text-indigo-600"
           >
             + New Journal
           </Link>
@@ -151,7 +151,7 @@ export default function DashboardHome() {
         {/* Recent Chats */}
         <section>
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-gray-700">Recent Chats</h2>
+            <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Recent Chats</h2>
           </div>
 
           {data?.recent_chats.length ? (
@@ -160,12 +160,12 @@ export default function DashboardHome() {
                 <li key={c.id}>
                   <Link
                     to={`/dashboard/chat/${c.id}`}
-                    className="flex items-center justify-between rounded-lg border border-gray-100 bg-white px-4 py-3 text-sm hover:border-indigo-200 hover:bg-indigo-50"
+                    className="flex items-center justify-between rounded-lg border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 text-sm hover:border-indigo-200 dark:hover:border-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
                   >
-                    <span className="truncate font-medium text-gray-800">
+                    <span className="truncate font-medium text-gray-800 dark:text-gray-100">
                       {c.title ?? "Untitled chat"}
                     </span>
-                    <span className="ml-3 shrink-0 text-xs text-gray-400">
+                    <span className="ml-3 shrink-0 text-xs text-gray-400 dark:text-gray-500">
                       {timeAgo(c.created_at)}
                     </span>
                   </Link>
@@ -181,7 +181,7 @@ export default function DashboardHome() {
 
           <Link
             to="/dashboard/chat/new"
-            className="mt-3 flex w-full items-center justify-center rounded-lg border border-dashed border-indigo-200 py-2 text-sm text-indigo-400 hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-600"
+            className="mt-3 flex w-full items-center justify-center rounded-lg border border-dashed border-indigo-200 dark:border-indigo-800 py-2 text-sm text-indigo-400 dark:text-indigo-500 hover:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:text-indigo-600"
           >
             + New Chat
           </Link>
@@ -205,13 +205,15 @@ function StatCard({
   return (
     <div
       className={`rounded-xl border p-4 ${
-        highlight ? "border-orange-200 bg-orange-50" : "border-gray-100 bg-white"
+        highlight
+          ? "border-orange-200 bg-orange-50 dark:border-orange-800 dark:bg-orange-900/20"
+          : "border-gray-100 bg-white dark:border-gray-700 dark:bg-gray-800"
       }`}
     >
       <div className="text-2xl">{icon}</div>
       <div
         className={`mt-1 text-2xl font-bold ${
-          highlight ? "text-orange-500" : "text-gray-800"
+          highlight ? "text-orange-500" : "text-gray-800 dark:text-gray-100"
         }`}
       >
         {value}
@@ -229,8 +231,8 @@ function EmptyState({
   action: { label: string; href: string };
 }) {
   return (
-    <div className="rounded-lg border border-dashed border-gray-200 px-4 py-6 text-center">
-      <p className="text-sm text-gray-400">{message}</p>
+    <div className="rounded-lg border border-dashed border-gray-200 dark:border-gray-700 px-4 py-6 text-center">
+      <p className="text-sm text-gray-400 dark:text-gray-500">{message}</p>
       <Link to={action.href} className="mt-1 inline-block text-xs text-indigo-500 hover:underline">
         {action.label}
       </Link>

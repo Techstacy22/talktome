@@ -8,6 +8,9 @@ from app.api.dashboard import router as dashboard_router
 from app.api.journals import router as journals_router
 from app.api.mindmap import router as mindmap_router
 from app.api.profile import router as profile_router
+from app.api.tasks import router as tasks_router
+from app.api.memories import router as memories_router
+from app.api.analytics import router as analytics_router
 from app.database import get_db
 
 router = APIRouter()
@@ -18,6 +21,9 @@ router.include_router(chat_router, prefix="/chat", tags=["Chat"])
 router.include_router(profile_router, prefix="/profile", tags=["Profile"])
 router.include_router(dashboard_router, prefix="/dashboard", tags=["Dashboard"])
 router.include_router(mindmap_router, prefix="/mindmap", tags=["MindMap"])
+router.include_router(tasks_router, prefix="/tasks", tags=["Tasks"])
+router.include_router(memories_router, prefix="/memories", tags=["Memories"])
+router.include_router(analytics_router, prefix="/analytics", tags=["Analytics"])
 
 
 @router.get("/health", tags=["Health"])

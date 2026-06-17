@@ -2,18 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../lib/api";
 
-interface Message {
-  id?: string;
-  role: "user" | "assistant";
-  content: string;
-}
-
-interface Session {
-  id: string;
-  title: string | null;
-  created_at: string;
-  messages: Message[];
-}
+interface Message { id?: string; role: "user" | "assistant"; content: string }
+interface Session { id: string; title: string | null; messages: Message[] }
 
 export default function Chat() {
   const { sessionId } = useParams<{ sessionId: string }>();
@@ -24,16 +14,14 @@ export default function Chat() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const token = localStorage.getItem("access_token");
 
-  // Load existing session messages
   useEffect(() => {
     if (!sessionId) return;
     api
       .get<Session>(`/chat/sessions/${sessionId}`)
-      .then((res) => setMessages(res.data.messages))
+      .then((r) => setMessages(r.data.messages))
       .catch(() => navigate("/dashboard"));
   }, [sessionId, navigate]);
 
-  // Auto-scroll to bottom on new messages
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -41,12 +29,9 @@ export default function Chat() {
   const sendMessage = async () => {
     const content = input.trim();
     if (!content || isStreaming) return;
-
     setInput("");
     setMessages((prev) => [...prev, { role: "user", content }]);
     setIsStreaming(true);
-
-    // Add empty assistant message placeholder
     setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
 
     try {
@@ -54,29 +39,19 @@ export default function Chat() {
         `${import.meta.env.VITE_API_URL}/chat/sessions/${sessionId}/messages`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
           body: JSON.stringify({ content }),
         }
       );
-
       const reader = response.body!.getReader();
       const decoder = new TextDecoder();
-
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-
-        const text = decoder.decode(value);
-        const lines = text.split("\n");
-
-        for (const line of lines) {
+        for (const line of decoder.decode(value).split("\n")) {
           if (!line.startsWith("data: ")) continue;
           const payload = line.slice(6);
           if (payload === "[DONE]") break;
-
           try {
             const { content: chunk } = JSON.parse(payload) as { content: string };
             setMessages((prev) => {
@@ -87,9 +62,7 @@ export default function Chat() {
               };
               return updated;
             });
-          } catch {
-            // ignore parse errors on partial chunks
-          }
+          } catch { /* partial chunk */ }
         }
       }
     } finally {
@@ -98,32 +71,25 @@ export default function Chat() {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   };
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] flex-col">
+    <div className="flex h-[calc(100vh-8rem)] flex-col md:h-[calc(100vh-4rem)]">
       {/* Messages */}
       <div className="flex-1 space-y-4 overflow-y-auto py-4 pr-2">
         {messages.length === 0 && (
-          <div className="flex h-full items-center justify-center text-gray-400">
+          <div className="flex h-full items-center justify-center text-gray-400 dark:text-gray-600">
             <p>Start the conversation — I'm here to listen.</p>
           </div>
         )}
-
         {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-          >
+          <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
             <div
               className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
                 msg.role === "user"
                   ? "bg-indigo-600 text-white"
-                  : "bg-white text-gray-800 shadow-sm"
+                  : "bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 shadow-sm dark:shadow-gray-900"
               }`}
             >
               {msg.content}
@@ -137,7 +103,7 @@ export default function Chat() {
       </div>
 
       {/* Input */}
-      <div className="border-t bg-white pt-4">
+      <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 pt-4">
         <div className="flex gap-3">
           <textarea
             value={input}
@@ -146,7 +112,7 @@ export default function Chat() {
             placeholder="Type a message… (Enter to send, Shift+Enter for new line)"
             rows={2}
             disabled={isStreaming}
-            className="flex-1 resize-none rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none disabled:opacity-50"
+            className="flex-1 resize-none rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-3 text-sm text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:border-indigo-500 focus:outline-none disabled:opacity-50"
           />
           <button
             type="button"

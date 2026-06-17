@@ -1,1 +1,13 @@
 @import "tailwindcss";
+
+/* Class-based dark mode: applies when <html> has .dark */
+@variant dark (&:where(.dark, .dark *));
+
+/* Page fade-in */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.page-enter {
+  animation: fadeIn 0.2s ease-out both;
+}

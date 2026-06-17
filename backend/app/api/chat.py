@@ -17,6 +17,7 @@ from app.schemas.chat import (
 )
 from app.services import ai as ai_service
 from app.services import chat as chat_service
+from app.services import memory as memory_service
 
 router = APIRouter()
 
@@ -87,10 +88,14 @@ async def send_message(
     ]
     history.append({"role": "user", "content": request.content})
 
+    # Inject long-term memories into the system prompt
+    memories = await memory_service.list_memories(db, current_user.id)
+    memory_context = memory_service.build_memory_context(memories)
+
     async def generate():
         full_reply = ""
         try:
-            async for chunk in ai_service.stream_chat(history):
+            async for chunk in ai_service.stream_chat(history, memory_context):
                 full_reply += chunk
                 yield f"data: {json.dumps({'content': chunk})}\n\n"
         finally:

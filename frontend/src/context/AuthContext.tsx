@@ -11,8 +11,8 @@ interface User {
 interface AuthContextType {
   user: User | null;
   token: string | null;
-  login: (token: string) => Promise<void>;
-  logout: () => void;
+  login: (accessToken: string, refreshToken: string) => Promise<void>;
+  logout: () => Promise<void>;
   isLoading: boolean;
 }
 
@@ -25,7 +25,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
   const [isLoading, setIsLoading] = useState(true);
 
-  // On mount, if a token exists, fetch the current user to validate it
   useEffect(() => {
     if (token) {
       api
@@ -33,6 +32,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .then((res) => setUser(res.data))
         .catch(() => {
           localStorage.removeItem("access_token");
+          localStorage.removeItem("refresh_token");
           setToken(null);
         })
         .finally(() => setIsLoading(false));
@@ -41,15 +41,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [token]);
 
-  const login = async (newToken: string) => {
-    localStorage.setItem("access_token", newToken);
-    setToken(newToken);
+  const login = async (accessToken: string, refreshToken: string) => {
+    localStorage.setItem("access_token", accessToken);
+    localStorage.setItem("refresh_token", refreshToken);
+    setToken(accessToken);
     const res = await api.get<User>("/auth/me");
     setUser(res.data);
   };
 
-  const logout = () => {
+  const logout = async () => {
+    const refreshToken = localStorage.getItem("refresh_token");
+    if (refreshToken) {
+      try {
+        await api.post("/auth/logout", { refresh_token: refreshToken });
+      } catch {
+        // best-effort: clear locally even if server call fails
+      }
+    }
     localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
     setToken(null);
     setUser(null);
   };

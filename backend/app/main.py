@@ -1,6 +1,7 @@
 import logging
 import logging.config
 
+import sentry_sdk
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -13,6 +14,14 @@ from app.config import settings
 from app.middleware.logging import RequestLoggingMiddleware
 from app.middleware.security import SecurityHeadersMiddleware
 from app.utils.errors import global_exception_handler, validation_exception_handler
+
+# ── Sentry (no-op if DSN not set) ────────────────────────────────────────────
+if settings.sentry_dsn:
+    sentry_sdk.init(
+        dsn=settings.sentry_dsn,
+        environment=settings.environment,
+        traces_sample_rate=0.2,
+    )
 
 # ── Logging setup ────────────────────────────────────────────────────────────
 logging.basicConfig(

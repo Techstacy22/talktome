@@ -6,8 +6,10 @@ alembic upgrade head
 
 echo "Starting server..."
 exec gunicorn app.main:app \
-  --workers 4 \
+  --workers "${WORKERS:-2}" \
   --worker-class uvicorn.workers.UvicornWorker \
   --bind 0.0.0.0:8000 \
   --timeout 120 \
-  --access-logfile -
+  --keep-alive 5 \
+  --access-logfile - \
+  --error-logfile -
