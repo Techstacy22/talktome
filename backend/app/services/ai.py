@@ -4,15 +4,25 @@ from openai import AsyncOpenAI
 
 from app.config import settings
 
-client = AsyncOpenAI(api_key=settings.openai_api_key)
-
 SYSTEM_PROMPT = """You are TalkToMe, an empathetic AI companion designed to help \
 students understand their thoughts, organize their lives, and make better decisions. \
 You listen actively, ask thoughtful follow-up questions, and provide supportive \
 guidance without judgment. Be warm, concise, and genuinely helpful."""
 
 
+def _client() -> AsyncOpenAI:
+    kwargs: dict = {"api_key": settings.openai_api_key}
+    if settings.ai_base_url:
+        kwargs["base_url"] = settings.ai_base_url
+    return AsyncOpenAI(**kwargs)
+
+
 async def stream_chat(history: list[dict]) -> AsyncGenerator[str, None]:
+    if not settings.openai_api_key:
+        yield "AI chat is not configured. Add an OPENAI_API_KEY to your .env file to enable this feature."
+        return
+
+    client = _client()
     messages = [{"role": "system", "content": SYSTEM_PROMPT}] + history
 
     stream = await client.chat.completions.create(

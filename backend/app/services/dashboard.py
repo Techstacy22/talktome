@@ -72,11 +72,14 @@ async def get_recent_chats(db: AsyncSession, user_id: UUID, limit: int = 3):
 async def generate_insight(
     name: str, journal_titles: list[str], chat_titles: list[str]
 ) -> str | None:
-    if not journal_titles and not chat_titles:
+    if not settings.openai_api_key or (not journal_titles and not chat_titles):
         return None
     from openai import AsyncOpenAI
 
-    client = AsyncOpenAI(api_key=settings.openai_api_key)
+    kwargs: dict = {"api_key": settings.openai_api_key}
+    if settings.ai_base_url:
+        kwargs["base_url"] = settings.ai_base_url
+    client = AsyncOpenAI(**kwargs)
     parts = []
     if journal_titles:
         parts.append(f"Journal entries: {', '.join(journal_titles[:5])}")

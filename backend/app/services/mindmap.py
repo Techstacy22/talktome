@@ -65,7 +65,12 @@ async def get_full_map(db: AsyncSession, user_id: UUID) -> dict:
 
 
 async def _extract_concepts(text: str) -> dict | None:
-    client = AsyncOpenAI(api_key=settings.openai_api_key)
+    if not settings.openai_api_key:
+        return None
+    kwargs: dict = {"api_key": settings.openai_api_key}
+    if settings.ai_base_url:
+        kwargs["base_url"] = settings.ai_base_url
+    client = AsyncOpenAI(**kwargs)
     try:
         response = await client.chat.completions.create(
             model=settings.openai_model,
