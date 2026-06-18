@@ -41,6 +41,7 @@ async def test_login_success(client: AsyncClient, registered_user: dict):
     assert res.status_code == 200
     data = res.json()
     assert "access_token" in data
+    assert "refresh_token" in data
     assert data["token_type"] == "bearer"
 
 

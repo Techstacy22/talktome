@@ -8,11 +8,26 @@ on:
 
 jobs:
   backend:
-    name: Backend — lint & import check
+    name: Backend — tests
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: backend
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: talktome_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - uses: actions/checkout@v4
@@ -26,10 +41,10 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Verify imports resolve
-        run: python -c "from app.main import app; print('OK')"
+      - name: Run tests
+        run: pytest -v
         env:
-          DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/talktome
+          DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/talktome_test
           SECRET_KEY: ci-secret-key
           OPENAI_API_KEY: sk-fake
 

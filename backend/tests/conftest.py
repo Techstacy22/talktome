@@ -91,3 +91,17 @@ async def auth_headers(client: AsyncClient, registered_user: dict) -> dict:
     assert res.status_code == 200
     token = res.json()["access_token"]
     return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture
+async def refresh_token(client: AsyncClient, registered_user: dict) -> str:
+    """Login and return the refresh token."""
+    res = await client.post(
+        "/api/auth/login",
+        data={
+            "username": registered_user["email"],
+            "password": registered_user["password"],
+        },
+    )
+    assert res.status_code == 200
+    return res.json()["refresh_token"]
